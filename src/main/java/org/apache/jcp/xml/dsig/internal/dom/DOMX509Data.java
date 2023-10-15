@@ -23,6 +23,8 @@ package org.apache.jcp.xml.dsig.internal.dom;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.security.Provider;
+import java.security.Security;
 import java.security.cert.CRLException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
@@ -218,13 +220,26 @@ public final class DOMX509Data extends DOMStructure implements X509Data {
     private X509Certificate unmarshalX509Certificate(Element elem)
         throws MarshalException
     {
+        CertificateException firstException = null;
         try (ByteArrayInputStream bs = unmarshalBase64Binary(elem)) {
-            return (X509Certificate)cf.generateCertificate(bs);
-        } catch (CertificateException e) {
-            throw new MarshalException("Cannot create X509Certificate", e);
+            for (Provider p : Security.getProviders()) {
+                try {
+                    return unmarshalX509Certificate(bs, p);
+                } catch (CertificateException e) {
+                    if (firstException == null) {
+                        firstException = e;
+                    }
+                }
+            }
         } catch (IOException e) {
             throw new MarshalException("Error closing stream", e);
         }
+        throw new MarshalException(firstException);
+    }
+
+    private X509Certificate unmarshalX509Certificate(ByteArrayInputStream bs, Provider p)
+            throws CertificateException {
+        return (X509Certificate) CertificateFactory.getInstance("X.509", p).generateCertificate(bs);
     }
 
     private X509CRL unmarshalX509CRL(Element elem) throws MarshalException {
