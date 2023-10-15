@@ -65,57 +65,57 @@ public abstract class DOMSignatureMethod extends AbstractDOMSignatureMethod {
     private Signature signature;
 
     // see RFC 4051 for these algorithm definitions
-    static final String RSA_SHA224 =
+    public static final String RSA_SHA224 =
         "http://www.w3.org/2001/04/xmldsig-more#rsa-sha224";
-    static final String RSA_SHA256 =
+    public static final String RSA_SHA256 =
         "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256";
-    static final String RSA_SHA384 =
+    public static final String RSA_SHA384 =
         "http://www.w3.org/2001/04/xmldsig-more#rsa-sha384";
-    static final String RSA_SHA512 =
+    public static final String RSA_SHA512 =
         "http://www.w3.org/2001/04/xmldsig-more#rsa-sha512";
-    static final String RSA_RIPEMD160 =
+    public static final String RSA_RIPEMD160 =
         "http://www.w3.org/2001/04/xmldsig-more#rsa-ripemd160";
-    static final String ECDSA_SHA1 =
+    public static final String ECDSA_SHA1 =
         "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha1";
-    static final String ECDSA_SHA224 =
+    public static final String ECDSA_SHA224 =
         "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha224";
-    static final String ECDSA_SHA256 =
+    public static final String ECDSA_SHA256 =
         "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256";
-    static final String ECDSA_SHA384 =
+    public static final String ECDSA_SHA384 =
         "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha384";
-    static final String ECDSA_SHA512 =
+    public static final String ECDSA_SHA512 =
         "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha512";
-    static final String DSA_SHA256 =
+    public static final String DSA_SHA256 =
         "http://www.w3.org/2009/xmldsig11#dsa-sha256";
 
     // see RFC 9231 for these algorithm definitions
-    static final String ED25519 =
+    public static final String ED25519 =
         "http://www.w3.org/2021/04/xmldsig-more#eddsa-ed25519";
-    static final String ED448 =
+    public static final String ED448 =
         "http://www.w3.org/2021/04/xmldsig-more#eddsa-ed448";
 
     // see RFC 6931 for these algorithm definitions
-    static final String ECDSA_RIPEMD160 =
+    public static final String ECDSA_RIPEMD160 =
         "http://www.w3.org/2007/05/xmldsig-more#ecdsa-ripemd160";
-    static final String RSA_SHA1_MGF1 =
+    public static final String RSA_SHA1_MGF1 =
         "http://www.w3.org/2007/05/xmldsig-more#sha1-rsa-MGF1";
-    static final String RSA_SHA224_MGF1 =
+    public static final String RSA_SHA224_MGF1 =
         "http://www.w3.org/2007/05/xmldsig-more#sha224-rsa-MGF1";
-    static final String RSA_SHA256_MGF1 =
+    public static final String RSA_SHA256_MGF1 =
         "http://www.w3.org/2007/05/xmldsig-more#sha256-rsa-MGF1";
-    static final String RSA_SHA384_MGF1 =
+    public static final String RSA_SHA384_MGF1 =
         "http://www.w3.org/2007/05/xmldsig-more#sha384-rsa-MGF1";
-    static final String RSA_SHA512_MGF1 =
+    public static final String RSA_SHA512_MGF1 =
         "http://www.w3.org/2007/05/xmldsig-more#sha512-rsa-MGF1";
-    static final String RSA_RIPEMD160_MGF1 =
+    public static final String RSA_RIPEMD160_MGF1 =
         "http://www.w3.org/2007/05/xmldsig-more#ripemd160-rsa-MGF1";
-    static final String RSA_SHA3_224_MGF1 =
+    public static final String RSA_SHA3_224_MGF1 =
         "http://www.w3.org/2007/05/xmldsig-more#sha3-224-rsa-MGF1";
-    static final String RSA_SHA3_256_MGF1 =
+    public static final String RSA_SHA3_256_MGF1 =
         "http://www.w3.org/2007/05/xmldsig-more#sha3-256-rsa-MGF1";
-    static final String RSA_SHA3_384_MGF1 =
+    public static final String RSA_SHA3_384_MGF1 =
         "http://www.w3.org/2007/05/xmldsig-more#sha3-384-rsa-MGF1";
-    static final String RSA_SHA3_512_MGF1 =
+    public static final String RSA_SHA3_512_MGF1 =
         "http://www.w3.org/2007/05/xmldsig-more#sha3-512-rsa-MGF1";
 
     // GB/T
