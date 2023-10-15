@@ -27,11 +27,7 @@ import java.security.spec.AlgorithmParameterSpec;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.xml.security.algorithms.implementations.IntegrityHmac;
-import org.apache.xml.security.algorithms.implementations.SignatureBaseRSA;
-import org.apache.xml.security.algorithms.implementations.SignatureDSA;
-import org.apache.xml.security.algorithms.implementations.SignatureECDSA;
-import org.apache.xml.security.algorithms.implementations.SignatureEDDSA;
+import org.apache.xml.security.algorithms.implementations.*;
 import org.apache.xml.security.exceptions.AlgorithmAlreadyRegisteredException;
 import org.apache.xml.security.exceptions.XMLSecurityException;
 import org.apache.xml.security.signature.XMLSignature;
@@ -415,6 +411,9 @@ public class SignatureAlgorithm extends Algorithm {
      */
     public static void registerDefaultAlgorithms() {
         algorithmHash.put(
+                XMLSignature.ALGO_ID_SIGNATURE_SM2_SM3, SignatureSM2.SignatureSM2SM3.class
+        );
+        algorithmHash.put(
             XMLSignature.ALGO_ID_SIGNATURE_DSA, SignatureDSA.class
         );
         algorithmHash.put(
@@ -517,6 +516,9 @@ public class SignatureAlgorithm extends Algorithm {
         );
         algorithmHash.put(
             XMLSignature.ALGO_ID_MAC_HMAC_SHA512, IntegrityHmac.IntegrityHmacSHA512.class
+        );
+        algorithmHash.put(
+            XMLSignature.ALGO_ID_MAC_HMAC_SM3, IntegrityHmac.IntegrityHmacSM3.class
         );
     }
 
