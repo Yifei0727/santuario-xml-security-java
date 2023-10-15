@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -26,17 +26,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.apache.xml.security.keys.keyresolver.implementations.DEREncodedKeyValueResolver;
-import org.apache.xml.security.keys.keyresolver.implementations.DSAKeyValueResolver;
-import org.apache.xml.security.keys.keyresolver.implementations.ECKeyValueResolver;
-import org.apache.xml.security.keys.keyresolver.implementations.KeyInfoReferenceResolver;
-import org.apache.xml.security.keys.keyresolver.implementations.RSAKeyValueResolver;
-import org.apache.xml.security.keys.keyresolver.implementations.RetrievalMethodResolver;
-import org.apache.xml.security.keys.keyresolver.implementations.X509CertificateResolver;
-import org.apache.xml.security.keys.keyresolver.implementations.X509DigestResolver;
-import org.apache.xml.security.keys.keyresolver.implementations.X509IssuerSerialResolver;
-import org.apache.xml.security.keys.keyresolver.implementations.X509SKIResolver;
-import org.apache.xml.security.keys.keyresolver.implementations.X509SubjectNameResolver;
+import org.apache.xml.security.keys.keyresolver.implementations.*;
 import org.apache.xml.security.keys.storage.StorageResolver;
 import org.apache.xml.security.utils.ClassLoaderUtils;
 import org.apache.xml.security.utils.JavaUtils;
@@ -262,6 +252,7 @@ public class KeyResolver {
         if (defaultResolversAdded.compareAndSet(false, true)) {
             List<KeyResolverSpi> keyResolverList = new ArrayList<>();
             keyResolverList.add(new RSAKeyValueResolver());
+            keyResolverList.add(new SM2KeyValueResolver());
             keyResolverList.add(new DSAKeyValueResolver());
             keyResolverList.add(new X509CertificateResolver());
             keyResolverList.add(new X509SKIResolver());

@@ -118,6 +118,9 @@ public abstract class DOMSignatureMethod extends AbstractDOMSignatureMethod {
     static final String RSA_SHA3_512_MGF1 =
         "http://www.w3.org/2007/05/xmldsig-more#sha3-512-rsa-MGF1";
 
+    // GB/T
+    public static final String SM2_SM3 =
+        "http://www.w3.org/2001/04/xmldsig-more#sm2-sm3";
     /**
      * Creates a <code>DOMSignatureMethod</code>.
      *
@@ -196,6 +199,8 @@ public abstract class DOMSignatureMethod extends AbstractDOMSignatureMethod {
             return new SHA384withRSA(smElem);
         } else if (alg.equals(RSA_SHA512)) {
             return new SHA512withRSA(smElem);
+        } else if (alg.equals(SM2_SM3)) {
+            return new SM3withSM2(smElem);
         } else if (alg.equals(RSA_RIPEMD160)) {
             return new RIPEMD160withRSA(smElem);
         } else if (alg.equals(RSA_SHA1_MGF1)) {
@@ -592,6 +597,34 @@ public abstract class DOMSignatureMethod extends AbstractDOMSignatureMethod {
         @Override
         Type getAlgorithmType() {
             return Type.EDDSA;
+        }
+    }
+
+    static final class SM3withSM2 extends AbstractECDSASignatureMethod {
+        SM3withSM2(AlgorithmParameterSpec params)
+            throws InvalidAlgorithmParameterException {
+            super(params);
+        }
+
+        SM3withSM2(Element dmElem) throws MarshalException {
+            super(dmElem);
+        }
+
+        public String getAlgorithm() {
+            return SM2_SM3;
+        }
+
+        String getJCAAlgorithm() {
+            return "SM3withSM2";
+        }
+
+        @Override
+        String getJCAFallbackAlgorithm() {
+            return "SM2withSM3";
+        }
+
+        Type getAlgorithmType() {
+            return Type.SM2;
         }
     }
 
