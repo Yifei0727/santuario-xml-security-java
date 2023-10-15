@@ -21,12 +21,19 @@
  */
 package org.apache.jcp.xml.dsig.internal.dom;
 
+import org.apache.xml.security.utils.XMLUtils;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+
+import javax.xml.crypto.MarshalException;
+import javax.xml.crypto.dom.DOMCryptoContext;
+import javax.xml.crypto.dsig.XMLSignature;
+import javax.xml.crypto.dsig.keyinfo.KeyValue;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.security.KeyException;
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
+import java.security.*;
 import java.security.interfaces.DSAParams;
 import java.security.interfaces.DSAPublicKey;
 import java.security.interfaces.ECPublicKey;
@@ -90,6 +97,8 @@ public abstract class DOMKeyValue<K extends PublicKey> extends DOMStructure impl
             return new DSA(kvtElem);
         } else if ("RSAKeyValue".equals(kvtElem.getLocalName()) && XMLSignature.XMLNS.equals(namespace)) {
             return new RSA(kvtElem);
+        } else if ("SM2KeyValue".equals(kvtElem.getLocalName()) && XMLDSIG_11_XMLNS.equals(namespace)) {
+            return new SM2(kvtElem);
         } else if ("ECKeyValue".equals(kvtElem.getLocalName()) && XMLDSIG_11_XMLNS.equals(namespace)) {
             return new EC(kvtElem);
         } else {
@@ -320,6 +329,148 @@ public abstract class DOMKeyValue<K extends PublicKey> extends DOMStructure impl
         }
     }
 
+    static final class SM2 extends DOMKeyValue<PublicKey> {
+        /* GM/T SM2 */
+        static final EC.Curve sm2p256v1 = initializeCurve(
+                "sm2p256v1",
+                "1.2.156.10197.1.301",
+                "FFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000FFFFFFFFFFFFFFFF",// p,0
+                "FFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000FFFFFFFFFFFFFFFC",// a,1
+                "28E9FA9E9D9F5E344D5A9E4BCF6509A7F39789F515AB8F92DDBCBD414D940E93",// b,2
+                "32C4AE2C1F1981195F9904466A39C9948FE30BBFF2660BE1715A4589334C74C7",// Gx,4
+                "BC3736A2F4F6779C59BDCEE36B692153D0A9877CC62A474002DF32E52139F0A0", // Gy,5
+                "FFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFF7203DF6B21C6052B53BBF40939D54123",// n,3
+                1
+        );
+
+        SM2(Element dmElem) throws MarshalException {
+            super(dmElem);
+        }
+
+        public SM2(PublicKey key) throws KeyException {
+            super(key);
+        }
+
+        private static EC.Curve initializeCurve(String name, String oid,
+                                                String sfield, String a, String b,
+                                                String x, String y, String n, int h) {
+            BigInteger p = bigInt(sfield);
+            ECField field = new ECFieldFp(p);
+            EllipticCurve curve = new EllipticCurve(field, bigInt(a),
+                                                    bigInt(b));
+            ECPoint g = new ECPoint(bigInt(x), bigInt(y));
+            return new EC.Curve(name, oid, curve, g, bigInt(n), h);
+        }
+
+        static byte[] asUnsignedByteArray(int length, BigInteger value) {
+            byte[] bytes = value.toByteArray();
+            if (bytes.length == length) {
+                return bytes;
+            }
+
+            int start = bytes[0] == 0 ? 1 : 0;
+            int count = bytes.length - start;
+
+            if (count > length) {
+                throw new IllegalArgumentException("standard length exceeded for value");
+            }
+
+            byte[] tmp = new byte[length];
+            System.arraycopy(bytes, start, tmp, tmp.length - count, count);
+            return tmp;
+        }
+
+
+        @Override
+        void marshalPublicKey(Node parent, Document doc, String dsPrefix, DOMCryptoContext context) throws MarshalException {
+            String prefix = DOMUtils.getNSPrefix(context, XMLDSIG_11_XMLNS);
+            Element ecKeyValueElem = DOMUtils.createElement(doc, "SM2KeyValue",
+                                                            XMLDSIG_11_XMLNS,
+                                                            prefix);
+            Element namedCurveElem = DOMUtils.createElement(doc, "NamedCurve",
+                                                            XMLDSIG_11_XMLNS,
+                                                            prefix);
+            Element publicKeyElem = DOMUtils.createElement(doc, "PublicKey",
+                                                           XMLDSIG_11_XMLNS,
+                                                           prefix);
+            String oid = "1.2.156.10197.1.301";
+            DOMUtils.setAttribute(namedCurveElem, "URI", "urn:oid:" + oid);
+            String qname = (prefix == null || prefix.length() == 0)
+                           ? "xmlns" : "xmlns:" + prefix;
+            namedCurveElem.setAttributeNS("http://www.w3.org/2000/xmlns/",
+                                          qname, XMLDSIG_11_XMLNS);
+            ecKeyValueElem.appendChild(namedCurveElem);
+            String encoded;
+            try {
+                ECPublicKey ecPublicKey = (ECPublicKey) getPublicKey();
+                BigInteger x = ecPublicKey.getW().getAffineX();
+                BigInteger y = ecPublicKey.getW().getAffineY();
+                ByteArrayOutputStream out = new ByteArrayOutputStream(65);
+                out.write(0x04);
+                out.write(asUnsignedByteArray(32, x), 0, 32);
+                out.write(asUnsignedByteArray(32, y), 0, 32);
+                encoded = XMLUtils.encodeToString(out.toByteArray());
+            } catch (KeyException e) {
+                throw new MarshalException(e);
+            }
+            publicKeyElem.appendChild
+                                 (DOMUtils.getOwnerDocument(publicKeyElem).createTextNode(encoded));
+            ecKeyValueElem.appendChild(publicKeyElem);
+            parent.appendChild(ecKeyValueElem);
+        }
+
+        @Override
+        PublicKey unmarshalKeyValue(Element kvtElem) throws MarshalException {
+
+            Element curElem = DOMUtils.getFirstChildElement(kvtElem);
+            if (curElem == null) {
+                throw new MarshalException("KeyValue must contain at least one type");
+            }
+
+            if ("NamedCurve".equals(curElem.getLocalName())
+                && XMLDSIG_11_XMLNS.equals(curElem.getNamespaceURI())) {
+                String uri = DOMUtils.getAttributeValue(curElem, "URI");
+                // strip off "urn:oid"
+                if (uri.startsWith("urn:oid:")) {
+                    String oid = uri.substring("urn:oid:".length());
+                    if (!"1.2.156.10197.1.301".equals(oid)) {
+                        throw new MarshalException("Invalid NamedCurve URI for SM2");
+                    }
+                } else {
+                    throw new MarshalException("Invalid NamedCurve URI");
+                }
+            } else {
+                throw new MarshalException("Invalid SM2KeyValue");
+            }
+            curElem = DOMUtils.getNextSiblingElement(curElem, "PublicKey", XMLDSIG_11_XMLNS);
+
+            String content = XMLUtils.getFullTextChildrenFromNode(curElem);
+            byte[] publicKey = XMLUtils.decode(content);
+            if (null == publicKey || publicKey.length != 65 || publicKey[0] != 0x04) {
+                throw new MarshalException("Invalid SM2KeyValue");
+            }
+            BigInteger x;
+            BigInteger y;
+            try {
+                x = new BigInteger(1, Arrays.copyOfRange(publicKey, 1, 33));
+                y = new BigInteger(1, Arrays.copyOfRange(publicKey, 33, 65));
+            } catch (NumberFormatException e) {
+                throw new MarshalException("Invalid SM2KeyValue", e);
+            }
+            for (Provider p : Security.getProviders()) {
+                try {
+                    KeyFactory keyFactory = KeyFactory.getInstance("SM2", p);
+                    ECPublicKeySpec ecPublicKeySpec = new ECPublicKeySpec(
+                            new ECPoint(x, y), sm2p256v1);
+                   return keyFactory.generatePublic(ecPublicKeySpec);
+                } catch (NoSuchAlgorithmException e) {
+                } catch (InvalidKeySpecException e) {
+                }
+            }
+            throw new MarshalException("Invalid SM2KeyValue");
+        }
+    }
+
     static final class EC extends DOMKeyValue<ECPublicKey> {
      // ECKeyValue CryptoBinaries
         private byte[] ecPublicKey;
@@ -438,7 +589,9 @@ public abstract class DOMKeyValue<K extends PublicKey> extends DOMStructure impl
             // curves. If there is a match, return the object identifier
             // of the curve.
             Curve match;
-            if (matchCurve(params, SECP256R1)) {
+            if (matchCurve(params, SM2.sm2p256v1)) {
+                match = SM2.sm2p256v1;
+            } else if (matchCurve(params, SECP256R1)) {
                 match = SECP256R1;
             } else if (matchCurve(params, SECP384R1)) {
                 match = SECP384R1;
@@ -545,7 +698,9 @@ public abstract class DOMKeyValue<K extends PublicKey> extends DOMStructure impl
         }
 
         private static ECParameterSpec getECParameterSpec(String oid) {
-            if (oid.equals(SECP256R1.getObjectId())) {
+            if (oid.equals(SM2.sm2p256v1.getObjectId())) {
+                return SM2.sm2p256v1;
+            } else if (oid.equals(SECP256R1.getObjectId())) {
                 return SECP256R1;
             } else if (oid.equals(SECP384R1.getObjectId())) {
                 return SECP384R1;
