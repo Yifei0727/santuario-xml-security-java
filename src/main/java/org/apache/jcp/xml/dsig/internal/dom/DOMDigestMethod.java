@@ -41,21 +41,23 @@ import org.w3c.dom.Node;
 public abstract class DOMDigestMethod extends DOMStructure
     implements DigestMethod {
 
-    static final String SHA224 =
+    public static final String SHA224 =
         "http://www.w3.org/2001/04/xmldsig-more#sha224"; // see RFC 4051
-    static final String SHA384 =
+    public static final String SHA384 =
         "http://www.w3.org/2001/04/xmldsig-more#sha384"; // see RFC 4051
     static final String WHIRLPOOL =
         "http://www.w3.org/2007/05/xmldsig-more#whirlpool"; // see RFC 6931
-    static final String SHA3_224 =
+    public static final String SHA3_224 =
         "http://www.w3.org/2007/05/xmldsig-more#sha3-224"; // see RFC 6931
-    static final String SHA3_256 =
+    public static final String SHA3_256 =
         "http://www.w3.org/2007/05/xmldsig-more#sha3-256"; // see RFC 6931
-    static final String SHA3_384 =
+    public static final String SHA3_384 =
         "http://www.w3.org/2007/05/xmldsig-more#sha3-384"; // see RFC 6931
-    static final String SHA3_512 =
+    public static final String SHA3_512 =
         "http://www.w3.org/2007/05/xmldsig-more#sha3-512"; // see RFC 6931
 
+    public static final String SM3 =
+        "http://www.w3.org/2001/04/xmldsig-more#sm3"; // see GB/T 32905-2016
     private DigestMethodParameterSpec params;
 
     /**
@@ -119,6 +121,8 @@ public abstract class DOMDigestMethod extends DOMStructure
             return new SHA3_384(dmElem);
         } else if (alg.equals(SHA3_512)) {
             return new SHA3_512(dmElem);
+        } else if (alg.equals(SM3)) {
+            return new SM3(dmElem);
         } else {
             throw new MarshalException("unsupported DigestMethod algorithm: " +
                                        alg);
@@ -241,6 +245,25 @@ public abstract class DOMDigestMethod extends DOMStructure
      * Returns the MessageDigest standard algorithm name.
      */
     abstract String getMessageDigestAlgorithm();
+
+    static final class SM3 extends DOMDigestMethod {
+        SM3(AlgorithmParameterSpec params)
+            throws InvalidAlgorithmParameterException {
+            super(params);
+        }
+
+        SM3(Element dmElem) throws MarshalException {
+            super(dmElem);
+        }
+
+        public String getAlgorithm() {
+            return SM3;
+        }
+
+        String getMessageDigestAlgorithm() {
+            return "SM3";
+        }
+    }
 
     static final class SHA1 extends DOMDigestMethod {
         SHA1(AlgorithmParameterSpec params)

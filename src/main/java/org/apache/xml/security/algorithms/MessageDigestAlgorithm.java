@@ -69,6 +69,8 @@ public final class MessageDigestAlgorithm extends Algorithm {
     public static final String ALGO_ID_DIGEST_SHA3_512 =
         Constants.XML_DSIG_NS_MORE_07_05 + "sha3-512";
 
+    public static final String ALGO_ID_DIGEST_SM3 =
+        Constants.MoreAlgorithmsSpecNS + "sm3";
     /** Field algorithm stores the actual {@link java.security.MessageDigest} */
     private final MessageDigest algorithm;
 
