@@ -79,6 +79,8 @@ public final class DOMKeyInfoFactory extends KeyInfoFactory {
             return new DOMKeyValue.DSA((DSAPublicKey) key);
         } else if ("RSA".equals(algorithm)) {
             return new DOMKeyValue.RSA((RSAPublicKey) key);
+        } else if ("SM2".equals(algorithm)) {
+            return new DOMKeyValue.SM2((ECPublicKey) key);
         } else if ("EC".equals(algorithm)) {
             return new DOMKeyValue.EC((ECPublicKey) key);
         } else {
