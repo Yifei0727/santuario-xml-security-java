@@ -215,6 +215,9 @@ public final class Constants {
     /** Tag of Element J **/
     public static final String _TAG_J = "J";
 
+    /** Tag of Element SM2KeyValue **/
+    public static final String _TAG_SM2KEYVALUE = "SM2KeyValue";
+
     /** Tag of Element ECKeyValue **/
     public static final String _TAG_ECKEYVALUE = "ECKeyValue";
 

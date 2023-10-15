@@ -8,6 +8,14 @@
   <import namespace="http://www.w3.org/2000/09/xmldsig#"
           schemaLocation='./xmldsig-core-schema.xsd'/>
           
+  <element name="SM2KeyValue" type="dsig11:SM2KeyValueType"/>
+  <complexType name="SM2KeyValueType">
+    <sequence>
+      <element name="NamedCurve" type="dsig11:NamedCurveType"/>
+      <element name="PublicKey" type="dsig11:ECPointType"/>
+    </sequence>
+    <attribute name="Id" type="ID" use="optional"/>
+  </complexType>
   <element name="ECKeyValue" type="dsig11:ECKeyValueType"/>
   <complexType name="ECKeyValueType">
     <sequence>
